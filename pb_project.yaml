@@ -1,7 +1,7 @@
 # Project name
 name: base_features
 # Project's yaml schema version
-schema_version: 44
+schema_version: 53
 # WH Connection Profile to use.
 connection: test
 # Whether to allow inputs having no timestamps,
@@ -36,3 +36,5 @@ id_types:
         regex: ".+@.+"
       - type: exclude
         value: "test@company.com"
+python_requirements:
+  - profiles-rudderstack==0.11.2
