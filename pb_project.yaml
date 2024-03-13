@@ -36,5 +36,3 @@ id_types:
         regex: ".+@.+"
       - type: exclude
         value: "test@company.com"
-python_requirements:
-  - profiles-rudderstack==0.11.0
