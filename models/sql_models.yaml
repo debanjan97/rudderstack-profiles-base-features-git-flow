@@ -41,7 +41,7 @@ models:
       materialization:
         output_type: ephemeral
         run_type: discrete
-      single_sql: select system$wait(4, 'HOURS')
+      single_sql: select system$wait(4, 'HOURS') as gg
       ids:
         - select: "user_id"
           type: user_id
