@@ -38,7 +38,7 @@ models:
     model_spec:
       validity_time: 24h # 1 day
       materialization:
-        output_type: ephemeral
+        output_type: table
         run_type: discrete
       single_sql: select system$wait(4, 'HOURS') as gg
       ids:
