@@ -35,7 +35,6 @@ models:
           - name: anonymous_id
   - name: sleep
     model_type: sql_template
-    requested_enabled_status: must_have
     model_spec:
       validity_time: 24h # 1 day
       materialization:
