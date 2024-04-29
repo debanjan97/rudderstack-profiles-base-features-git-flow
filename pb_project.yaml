@@ -19,6 +19,12 @@ entities:
       - anonymous_id
       - email
       - cart_token
+    serve_traits:
+      - id_served: user_id
+      - id_served: anonymous_id
+      - id_served: email
+      - id_served: cart_token
+      - id_served: user_main_id
 id_types:
   - name: user_id
   - name: cart_token
@@ -37,4 +43,4 @@ id_types:
       - type: exclude
         value: "test@company.com"
 python_requirements:
-  - profiles-rudderstack==0.12.0
+  - profiles-rudderstack==0.10.8
