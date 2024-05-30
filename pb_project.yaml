@@ -39,4 +39,4 @@ id_types:
       - type: exclude
         value: "test@company.com"
 python_requirements:
-  - profiles-rudderstack==0.14.0a1
+  - profiles-rudderstack==0.10.8
