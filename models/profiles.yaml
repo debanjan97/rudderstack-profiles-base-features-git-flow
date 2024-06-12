@@ -117,14 +117,14 @@ var_groups:
       #     from: models/rsTracksUnionPages
       #     where: "{{macro_datediff_n('timestamp','365')}}"
       #     description: Out of 365 days, how many days have recorded an event till date including today
-      # - input_var:
-      #     name: session_start_time
-      #     from: models/rsTracksUnionPages
-      #     select: min(timestamp)
-      #     window:
-      #       partition_by:
-      #         - context_session_id
-      #         - rudder_id
+      - input_var:
+          name: session_start_time
+          from: models/rsTracksUnionPages
+          select: min(timestamp)
+          window:
+            partition_by:
+              - context_session_id
+              - rudder_id
       #     description: Describes the start time of session of a specific context_id
       # - input_var:
       #     name: session_end_time
