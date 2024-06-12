@@ -19,8 +19,8 @@ entities:
       - anonymous_id
       - email
       - cart_token
-    serve_traits:
-      - id_served: user_id
+    # serve_traits:
+    #   - id_served: user_id
 id_types:
   - name: user_id
   - name: cart_token
