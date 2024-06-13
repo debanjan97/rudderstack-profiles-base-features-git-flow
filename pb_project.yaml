@@ -40,3 +40,4 @@ id_types:
         value: "test@company.com"
 python_requirements:
   - profiles-rudderstack==0.10.8
+  - profiles-pycorelib==0.13.0
