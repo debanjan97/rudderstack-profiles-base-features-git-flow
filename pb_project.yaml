@@ -3,7 +3,7 @@ name: base_features
 # Project's yaml schema version
 schema_version: 49
 # WH Connection Profile to use.
-connection: test
+connection: xdxdxdxd
 # Whether to allow inputs having no timestamps,
 # if true, data without timestamps are included when running models
 include_untimed: true
@@ -40,4 +40,3 @@ id_types:
         value: "test@company.com"
 python_requirements:
   - profiles-rudderstack==0.10.8
-  - profiles-pycorelib==0.13.0
