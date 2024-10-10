@@ -2,9 +2,9 @@
 name: base_features
 # Project's yaml schema version
 schema_version: 49
-# WH Connection Profile to use.
+# WH Connection test Profile to use.
 connection: xdxdxdxd
-# Whether to allow test inputs having no timestamps,
+# Whether to allow inputs having no timestamps,
 # if true, data without timestamps are included when running models
 include_untimed: true
 # Model folders to use.
