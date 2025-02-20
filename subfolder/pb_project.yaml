@@ -1,0 +1,41 @@
+# Project name
+name: base_features
+# Project's yaml schema version
+schema_version: 80
+# WH Connection Profile to use.
+connection: test
+# Model folders to use.
+model_folders:
+  - models
+# Entities in this project and their ids.
+entities:
+  - name: user
+    id_stitcher: models/rudder_user_id_stitcher
+    id_types:
+      - user_id
+      - anonymous_id
+      - email
+      - cart_token
+    feature_views:
+      using_ids:
+        - id: user_id
+          name: user_id_user_default_entity_serve_360
+          # Added by auto migration, please update the name as per your requirement
+id_types:
+  - name: user_id
+  - name: cart_token
+  - name: anonymous_id
+    filters:
+      - type: exclude
+        value: ""
+      - type: exclude
+        value: "unknown"
+      - type: exclude
+        value: "NaN"
+  - name: email
+    filters:
+      - type: include
+        regex: ".+@.+"
+      - type: exclude
+        value: "test@company.com"
+retention_period: 720h0m0s
