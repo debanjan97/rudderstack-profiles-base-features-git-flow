@@ -1,0 +1,76 @@
+inputs:
+  - name: webapp_identifies
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+      with_columns: []
+    app_defaults:
+      table: rudder_webapp_data.rudderwebapp.identifies
+      occurred_at_col: timestamp
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user
+          to_default_stitcher: true
+        - select: lower(email)
+          type: email
+          entity: user
+          to_default_stitcher: true
+        - select: anonymous_id
+          type: anon_id
+          entity: user
+          to_default_stitcher: true
+  - name: webapp_tracks
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+        - workspace
+      with_columns: []
+    app_defaults:
+      table: rudder_webapp_data.rudderwebapp.tracks
+      occurred_at_col: timestamp
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user
+          to_default_stitcher: true
+        - select: anonymous_id
+          type: anon_id
+          entity: user
+          to_default_stitcher: true
+        - select: context_traits_workspace_id
+          type: workspace_id
+          entity: workspace
+          to_default_stitcher: true
+  - name: webapp_pages
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+        - workspace
+      with_columns: []
+    app_defaults:
+      table: rudder_webapp_data.rudderwebapp.pages
+      occurred_at_col: timestamp
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user
+          to_default_stitcher: true
+        - select: anonymous_id
+          type: anon_id
+          entity: user
+          to_default_stitcher: true
+        - select: context_traits_workspace_id
+          type: workspace_id
+          entity: workspace
+          to_default_stitcher: true
+        - select: lower(context_traits_email)
+          type: email
+          entity: user
+          to_default_stitcher: true

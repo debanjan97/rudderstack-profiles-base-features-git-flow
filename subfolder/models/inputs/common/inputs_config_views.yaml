@@ -1,0 +1,59 @@
+inputs:
+  - name: config_workspace_plans_view
+    contract:
+      with_entity_ids:
+        - workspace
+        - organization
+    app_defaults:
+      view: RUDDER_TEST_EVENTS.PPW_PUBLIC.WORKSPACE_PLANS_VIEW
+      ids:
+        - entity: workspace
+          select: WORKSPACE_ID
+          type: workspace_id
+        - entity: organization
+          select: ORGANIZATION_ID
+          type: org_id
+  - name: config_enriched_sources_view
+    contract:
+      with_entity_ids:
+        - workspace
+        - source_type
+        - source
+    app_defaults:
+      view: RUDDER_TEST_EVENTS.PPW_PUBLIC.ENRICHED_SOURCES_VIEW
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+        - entity: source_type
+          select: SOURCEDEFINITIONID
+          type: source_defn_id
+        - entity: source_type
+          select: SOURCE_DEFN_NAME
+          type: source_defn_name
+        - entity: source
+          select: ID
+          type: source_id
+  - name: config_enriched_destinations_view
+    contract:
+      with_entity_ids:
+        - workspace
+        - destination_type
+        - destination
+    app_defaults:
+      view: RUDDER_TEST_EVENTS.PPW_PUBLIC.ENRICHED_DESTINATIONS_VIEW
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+        - entity: destination_type
+          select: DESTINATIONDEFINITIONID
+          type: destination_defn_id
+        - entity: destination_type
+          select: DESTINATION_DEFN_NAME
+          type: destination_defn_name
+        - entity: destination
+          select: ID
+          type: destination_id

@@ -1,0 +1,98 @@
+macros:
+  - name: app_event_filter
+    inputs:
+      - event_name_column
+    value: "{{event_name_column}} IS NOT NULL AND {{event_name_column}} != 'exposure' and {{event_name_column}} != 'mutiny_experience_viewed' and {{event_name_column}} != 'mutiny_signup'"
+
+  # Analytics Destinations
+  - name: macro_dest_analytics_general
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Google Analytics', 'Adobe Analytics', 'Matomo', 'Chartbeat', 'WOOPRA', 'Comscore', 'Google Analytics 4 (GA4)', 'Quantum Metric', 'Hotjar', 'Fullstory', 'Microsoft Clarity', 'Singular', 'Kochava', 'New Relic')"
+
+  - name: macro_dest_analytics_product
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Amplitude', 'Mixpanel', 'Heap.io', 'Pendo', 'Gainsight PX', 'JUNE', 'PostHog', 'Sprig', 'Qualtrics', 'SatisMeter')"
+
+  - name: macro_dest_analytics_all
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Google Analytics', 'Adobe Analytics', 'Matomo', 'Chartbeat', 'WOOPRA', 'Comscore', 'Google Analytics 4 (GA4)', 'Quantum Metric', 'Hotjar', 'Fullstory', 'Microsoft Clarity', 'Singular', 'Kochava', 'New Relic', 'Amplitude', 'Mixpanel', 'Heap.io', 'Pendo', 'Gainsight PX', 'JUNE', 'PostHog', 'Sprig', 'Qualtrics', 'SatisMeter')"
+
+  # AB Testing Tools
+  - name: macro_dest_ab_testing
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Optimizely Web', 'VWO', 'Dynamic Yield', 'Google Optimize', 'Optimizely Fullstack', 'Split.io')"
+
+  # Sales Tools
+  - name: macro_dest_sales
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Salesforce V2', 'Salesforce', 'Gainsight', 'PersistIQ', 'SnapEngage', 'Pipedrive', 'Freshsales')"
+  
+  # Customer Support Tools
+  - name: macro_dest_customer_support
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('SIGNL4', 'PagerDuty', 'Zendesk', 'Intercom', 'Delighted', 'Custify', 'Olark', 'livechat', 'Gladly', 'Trengo')"
+
+
+  # Advertising Tools
+  - name: macro_dest_advertising_social_media
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Facebook Custom Audience', 'Facebook Pixel', 'Snapchat Custom Audience', 'TikTok Audience', 'Linkedin Ads', 'X Ads', 'Pinterest Tag', 'Facebook App Events')"
+
+  - name: macro_dest_advertising_display_programmatic
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Google Ads Remarketing Lists', 'BingAds Audience', 'The Trade Desk Audience', 'Criteo Audience', 'Adroll', 'Yahoo DSP', 'Google Ads Offline Conversions', 'Facebook Offline Conversions', 'BingAds Offline Conversions')"
+
+  - name: macro_dest_advertising_mobile_app
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('AppsFlyer', 'Adjust', 'Kochava', 'Singular', 'Branch Metrics')"
+
+  - name: macro_dest_advertising_all
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Facebook Custom Audience', 'Facebook Pixel', 'Snapchat Custom Audience', 'TikTok Audience', 'Linkedin Ads', 'X Ads', 'Pinterest Tag', 'Facebook App Events', 'Google Ads Remarketing Lists', 'BingAds Audience', 'The Trade Desk Audience', 'Criteo Audience', 'Adroll', 'Yahoo DSP', 'Google Ads Offline Conversions', 'Facebook Offline Conversions', 'BingAds Offline Conversions', 'AppsFlyer', 'Adjust', 'Kochava', 'Singular', 'Branch Metrics')"
+
+  # Data Infrastructure Tools
+  - name: macro_dest_data_infra_warehouse_storage
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Databricks (Delta Lake)', 'Postgres', 'Azure Datalake', 'S3 Datalake', 'Google Cloud Storage Datalake', 'ClickHouse', 'Redis', 'Microsoft SQL Server', 'Google Cloud Storage', 'BigQuery', 'Redshift', 'MinIO', 'Azure Blob Storage', 'Snowflake', 'DigitalOcean Spaces', 'Amazon S3')"
+
+  - name: macro_dest_data_infra_streaming
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Amazon Kinesis', 'Google Cloud Pub/Sub', 'Confluent Cloud', 'Apache Kafka', 'AWS EventBridge', 'Azure Event Hubs', 'Azure Synapse', 'Amazon Kinesis Firehose')"
+
+  - name: macro_dest_data_infra_all
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Databricks (Delta Lake)', 'Postgres', 'Azure Datalake', 'S3 Datalake', 'Google Cloud Storage Datalake', 'ClickHouse', 'Redis', 'Microsoft SQL Server', 'Google Cloud Storage', 'BigQuery', 'Redshift', 'MinIO', 'Azure Blob Storage', 'Snowflake', 'DigitalOcean Spaces', 'Amazon S3', 'Amazon Kinesis', 'Google Cloud Pub/Sub', 'Confluent Cloud', 'Apache Kafka', 'AWS EventBridge', 'Azure Event Hubs', 'Azure Synapse', 'Amazon Kinesis Firehose')"
+
+  # Marketing Tools
+  - name: macro_dest_marketing_automation_crm
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Marketo', 'HubSpot', 'Salesforce Marketing Cloud', 'ActiveCampaign', 'Autopilot', 'Mautic', 'Freshmarketer', 'Braze', 'Iterable', 'MoEngage', 'WebEngage', 'Customer IO', 'Ortho', 'Klaviyo', 'Mailchimp', 'Drip')"
+
+  - name: macro_dest_marketing_email_sms
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Sendgrid', 'Mailjet', 'Sendinblue', 'Attentive Tag')"
+
+  - name: macro_dest_marketing_cdp
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Segment', 'Lytics', 'bloomreach', 'Tealium', 'mParticle')"
+
+  - name: macro_dest_marketing_all
+    inputs:
+      - destination_type
+    value: "{{destination_type}} IN ('Marketo', 'HubSpot', 'Salesforce Marketing Cloud', 'ActiveCampaign', 'Autopilot', 'Mautic', 'Freshmarketer', 'Braze', 'Iterable', 'MoEngage', 'WebEngage', 'Customer IO', 'Ortho', 'Klaviyo', 'Mailchimp', 'Drip', 'Sendgrid', 'Mailjet', 'Sendinblue', 'Attentive Tag', 'Segment', 'Lytics', 'bloomreach', 'Tealium', 'mParticle')"

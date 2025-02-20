@@ -1,0 +1,49 @@
+models:  
+  - name: active_source
+    model_type: entity_cohort
+    model_spec:
+      extends: source/all
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: include
+          value: "{{ source.Var('num_events_ingested_30d') }} > 100"
+      # feature_views:
+      #   using_ids:
+      #     - id: source_id
+      #       name: active_source_id_fv
+
+var_groups:
+  - name: base_vars
+    entity_key: source
+    time_grain: day
+    vars:
+      - entity_var:
+          name: num_events_ingested_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: INITIALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          is_feature: true
+          description: "Number of events ingested for specific source in the last 30 days"
+  - name: source_vars
+    entity_cohort: models/active_source
+    time_grain: day
+    vars:
+      - entity_var:
+          name: source_defn_name
+          select: any_value(source_defn_name)
+          from: inputs/config_enriched_sources_view
+          is_feature: true
+          description: "Source definition name"
+      - entity_var:
+          name: category
+          select: any_value(CATEGORY)
+          from: inputs/config_enriched_sources_view
+          is_feature: true
+          description: "Category of the source"
+      - entity_var:
+          name: workspace_id
+          select: any_value(WORKSPACEID)
+          from: inputs/config_enriched_sources_view
+          is_feature: true
+          description: "Workspace ID of the source"      

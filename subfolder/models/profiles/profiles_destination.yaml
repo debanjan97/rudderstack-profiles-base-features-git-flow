@@ -1,0 +1,49 @@
+models:  
+  - name: active_destination
+    model_type: entity_cohort
+    model_spec:
+      extends: destination/all
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: include
+          value: "{{ destination.Var('num_events_delivered_30d') }} > 100"
+      # feature_views:
+      #   using_ids:
+      #     - id: destination_id
+      #       name: active_destination_id_fv
+
+var_groups:
+  - name: base_vars
+    entity_key: destination
+    time_grain: day
+    vars:
+      - entity_var:
+          name: num_events_delivered_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: TERMINALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          is_feature: true
+          description: "Number of events delivered for specific destination in the last 30 days"
+  - name: destination_vars
+    entity_cohort: models/active_destination
+    time_grain: day
+    vars:
+      - entity_var:
+          name: destination_defn_name
+          select: any_value(destination_defn_name)
+          from: inputs/config_enriched_destinations_view
+          is_feature: true
+          description: "Destination definition name"
+      - entity_var:
+          name: category
+          select: any_value(CATEGORY)
+          from: inputs/config_enriched_destinations_view
+          is_feature: true
+          description: "Category of the destination"
+      - entity_var:
+          name: workspace_id
+          select: any_value(WORKSPACEID)
+          from: inputs/config_enriched_destinations_view
+          is_feature: true
+          description: "Workspace ID of the destination"      

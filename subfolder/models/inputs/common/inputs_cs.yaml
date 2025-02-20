@@ -1,0 +1,22 @@
+inputs:
+  # ACCOUNTS
+  - name: cs_user_accounts
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - organization
+      with_columns:
+        - name: orgid
+        - name: orgname
+        - name: displayname
+        - name: createdat
+    app_defaults:
+      table: CUSTOMER_SUCCESS.PUBLIC.ACCOUNT_VIEW_TABLE
+      occurred_at_col: CREATEDAT
+      ids:
+        # column name or sql expression
+        - entity: organization
+          select: ORGID
+          type: org_id
+          to_default_stitcher: true

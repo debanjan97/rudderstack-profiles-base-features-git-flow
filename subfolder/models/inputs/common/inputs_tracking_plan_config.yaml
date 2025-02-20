@@ -1,0 +1,49 @@
+inputs:
+  - name: config_tp_tracking_plans
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.TRACKING_PLANS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_tp_events
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.EVENTS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_tp_properties
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.PROPERTIES
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_tp_categories
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.CATEGORIES
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true

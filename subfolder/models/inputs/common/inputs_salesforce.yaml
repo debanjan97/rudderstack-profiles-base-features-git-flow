@@ -1,0 +1,35 @@
+inputs:
+  - name: sf_account
+    contract:
+      with_entity_ids:
+        - organization
+    app_defaults:
+      table: RUDDER_SALESFORCE.PUBLIC.SF_ACCOUNT
+      occurred_at_col: CREATED_DATE
+      ids:
+        # column name or sql expression
+        - entity: organization
+          select: case when "IS_DELETED" = 'FALSE' then "ORG_ID_C" end
+          type: org_id
+          to_default_stitcher: true
+        - entity: organization
+          select: case when account_status_c is not null then "ID" when record_type_id <> '0125x0000006uLeAAI' then "ID" when is_deleted = FALSE then "ID" end
+          type: salesforce_id
+          to_default_stitcher: true
+        - entity: organization
+          select: SLACK_CHANNEL_NAME_C
+          type: slack_channel_name
+          to_default_stitcher: true
+  - name: sf_opportunity
+    contract:
+      with_entity_ids:
+        - organization
+    app_defaults:
+      table: RUDDER_SALESFORCE.PUBLIC.SF_OPPORTUNITY
+      occurred_at_col: CREATED_DATE
+      ids:
+        # column name or sql expression
+        - entity: organization
+          select: ACCOUNT_ID
+          type: salesforce_id
+          to_default_stitcher: true

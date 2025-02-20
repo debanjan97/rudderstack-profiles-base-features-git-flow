@@ -1,0 +1,11 @@
+inputs:
+  - name: docs_pages
+    contract:
+      is_event_stream: true
+    app_defaults:
+      view: RUDDER_AUTOTRACK_DATA.AUTOTRACK.LAST_4_DAYS_PAGES
+      occurred_at_col: timestamp
+      ids:
+        - select: anonymous_id
+          type: anon_id
+          entity: user

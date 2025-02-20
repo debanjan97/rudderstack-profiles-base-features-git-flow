@@ -1,0 +1,16 @@
+inputs:
+  - name: gong_call
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - organization
+    app_defaults:
+      table: CUSTOMER_SUCCESS.PUBLIC.GONG_CALLS
+      occurred_at_col: DATE
+      ids:
+        # column name or sql expression
+        - entity: organization
+          select: SALESFORCE_ID
+          type: salesforce_id
+          to_default_stitcher: true

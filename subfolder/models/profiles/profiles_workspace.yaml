@@ -1,0 +1,490 @@
+models:
+  - name: workspace_id_graph
+    model_type: id_stitcher
+    model_spec:
+      validity_time: 24h # 1 day
+      # Below entity_key and the edge sources are all expected to be defined in the inputs.yaml file.
+      entity_key: workspace
+      edge_sources:
+        - from: inputs/config_workspaces
+        - from: inputs/config_destinations
+        - from: inputs/config_sources
+  - name: valid_workspace
+    model_type: entity_cohort
+    model_spec:
+      extends: workspace/all
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: include
+          value: "{{ workspace.Var('num_sources') }} > 0"
+        - type: include
+          value: "{{ workspace.Var('num_destinations') }} > 0"
+      feature_views:
+        using_ids:
+          - id: workspace_name
+            name: valid_workspace_name_fv
+  - name: active_workspace
+    model_type: entity_cohort
+    model_spec:
+      extends: models/valid_workspace
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: include
+          value: "{{ workspace.Var('events_ingested_30d') }} > 1000"
+      feature_views:
+        using_ids:
+          - id: workspace_name
+            name: active_workspace_name_fv
+  - name: paid_workspace
+    model_type: entity_cohort
+    model_spec:
+      extends: models/valid_workspace
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: exclude
+          value: "{{ workspace.Var('plan_type') }} = 'Free Tier'"
+        - type: exclude
+          value: "{{ workspace.Var('plan_type') }} = 'Open source plan'"
+        - type: exclude
+          value: "{{ workspace.Var('environment') }} = 'DEVELOPMENT'"
+      feature_views:
+        using_ids:
+          - id: workspace_name
+            name: paid_workspace_name_fv
+  - name: enterprise_workspace
+    model_type: entity_cohort
+    model_spec:
+      extends: models/paid_workspace
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: include
+          value: "{{ workspace.Var('plan_type') }} = 'Enterprise'"
+      feature_views:
+        using_ids:
+          - id: workspace_name
+            name: enterprise_workspace_name_fv
+var_groups:
+  - name: workspace_vars
+    entity_key: workspace
+    time_grain: day
+    vars:
+      - entity_var:
+          name: num_sources
+          select: count(ID)
+          from: inputs/config_sources
+          is_feature: true
+          description: "Number of sources"
+      - entity_var:
+          name: num_destinations
+          select: count(ID)
+          from: inputs/config_destinations
+          is_feature: true
+          description: "Number of destinations"
+      - entity_var:
+          name: num_track_events
+          select: count(ID)
+          from: inputs/webapp_tracks
+          is_feature: true
+          description: "Number of track events within the workspace across different users"
+      - entity_var:
+          name: org_id
+          select: any_value(ORGANIZATIONID)
+          from: inputs/config_workspaces
+          is_feature: true
+          description: "Organization ID"
+      - entity_var:
+          name: environment
+          select: any_value(ENVIRONMENT)
+          from: inputs/config_workspaces
+          is_feature: true
+          description: "Environment - Prod or Dev"
+      - entity_var:
+          name: plan_type
+          select: any_value(case WHEN plan_type IN ('Growth', 'Pro') THEN 'Growth' ELSE plan_type END)
+          from: inputs/config_workspace_plans_view
+          is_feature: true
+          description: "Plan type"
+      - entity_var:
+          name: events_ingested_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: INITIALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          is_feature: true
+          description: "Number of events ingested into the workspace in the last 30 days"
+  - name: integration_categorization_vars
+    entity_cohort: models/paid_workspace
+    time_grain: "week"
+    vars:
+      - entity_var:
+          name: num_sales_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_sales('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_marketing_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_marketing_all('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_analytics_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_analytics_all('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_customer_support_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_customer_support('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_advertising_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_advertising_all('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_ab_testing_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_ab_testing('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_data_infra_integrations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_data_infra_all('destination_defn_name')}}"
+          is_feature: true
+
+  - name: integration_sub_categorization_vars
+    entity_cohort: models/paid_workspace
+    time_grain: "week"
+    vars:
+      - entity_var:
+          name: num_marketing_automation_crm
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_marketing_automation_crm('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_marketing_email_sms
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_marketing_email_sms('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_marketing_cdp
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_marketing_cdp('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_data_infra_streaming
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_data_infra_streaming('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_data_infra_warehouse_storage
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_data_infra_warehouse_storage('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_advertising_social_media
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_advertising_social_media('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_advertising_display_programmatic
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_advertising_display_programmatic('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_advertising_mobile_app
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_advertising_mobile_app('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_analytics_general
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_analytics_general('destination_defn_name')}}"
+          is_feature: true
+      - entity_var:
+          name: num_analytics_product
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: "{{ macro_dest_analytics_product('destination_defn_name')}}"
+          is_feature: true
+
+  - name: transformation_vars
+    entity_cohort: models/valid_workspace
+    time_grain: "week"
+    vars:
+      - entity_var:
+          name: num_transformations
+          select: count(ID)
+          from: inputs/config_transformations
+          is_feature: true
+          time_grain: 
+          description: "Number of transformations"
+      - entity_var:
+          name: num_destinations_with_transformations
+          select: count(DESTINATIONID)
+          from: inputs/config_dest_transformations
+          is_feature: true
+          description: "Number of destinations with a connected transformation"
+      - entity_var:
+          name: num_js_transformations
+          select: count(ID)
+          from: inputs/config_transformations
+          where: LANGUAGE = 'javascript'
+          is_feature: true
+          description: "Number of JavaScript transformations"
+      - entity_var:
+          name: num_python_transformations
+          select: count(ID)
+          from: inputs/config_transformations
+          where: LANGUAGE = 'pythonfaas'
+          is_feature: true
+          description: "Number of Python transformations"
+      - entity_var:
+          name: num_js_transformations_last_30_days
+          select: count(ID)
+          from: inputs/config_transformations
+          where: LANGUAGE = 'javascript' and CREATEDAT >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of JavaScript transformations created in the last 30 days"
+      - entity_var:
+          name: num_python_transformations_last_30_days
+          select: count(ID)
+          from: inputs/config_transformations
+          where: LANGUAGE = 'pythonfaas' and CREATEDAT >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of Python transformations created in the last 30 days"
+      - entity_var:
+          name: num_javascript_libraries
+          select: count(ID)
+          from: inputs/config_transformation_libraries
+          where: LANGUAGE = 'javascript'
+          is_feature: true
+          description: "Number of JavaScript libraries"
+      - entity_var:
+          name: num_javascript_libraries_last_30_days
+          select: count(ID)
+          from: inputs/config_transformation_libraries
+          where: LANGUAGE = 'javascript' and CREATEDAT >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of JavaScript libraries created in the last 30 days"
+      - entity_var:
+          name: num_python_libraries
+          select: count(ID)
+          from: inputs/config_transformation_libraries
+          where: LANGUAGE = 'pythonfaas'
+          is_feature: true
+          description: "Number of Python libraries"
+      - entity_var:
+          name: num_python_libraries_last_30_days
+          select: count(ID)
+          from: inputs/config_transformation_libraries
+          where: LANGUAGE = 'pythonfaas' and CREATEDAT >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of Python libraries created in the last 30 days"
+      
+  - name: tracking_plans_vars
+    entity_cohort: models/valid_workspace
+    time_grain: "week"
+    vars:
+      # Legacy Tracking Plans
+      - entity_var:
+          name: num_tracking_plans_legacy
+          select: count(ID)
+          from: inputs/config_tracking_plans
+          is_feature: true
+          description: "Number of legacy tracking plans. Not being actively supported"
+      # Current Tracking Plans
+      - entity_var:
+          name: num_tp_tracking_plans
+          select: count(ID)
+          from: inputs/config_tp_tracking_plans
+          is_feature: true
+          description: "Number of tracking plans"
+      - entity_var:
+          name: num_sources_with_tracking_plans
+          select: count(SOURCEID)
+          from: inputs/config_source_tracking_plans
+          is_feature: true
+          description: "Number of sources connected to tracking plans"
+      - entity_var:
+          name: num_tp_events
+          select: count(ID)
+          from: inputs/config_tp_events
+          is_feature: true
+          description: "Number of distinct events in the data catalog"
+      - entity_var:
+          name: num_tp_properties
+          select: count(ID)
+          from: inputs/config_tp_properties
+          is_feature: true
+          description: "Number of distinct properties in the data catalog"
+  - name: activation_vars
+    entity_cohort: models/valid_workspace
+    vars:
+      - entity_var:
+          name: num_retl_sources
+          select: count(ID)
+          from: inputs/config_enriched_sources_view
+          where: CATEGORY = 'warehouse'
+          is_feature: true
+          description: "Number of rETL sources"      
+      - entity_var:
+          name: num_audiences
+          select: count(ID)
+          from: inputs/config_audiences
+          is_feature: true
+          description: "Number of audiences"
+      - entity_var:
+          name: num_retl_sql_models
+          select: count(ID)
+          from: inputs/config_retl_sql_models
+          is_feature: true
+          description: "Number of rETL SQL Models"
+      - entity_var:
+          name: num_audience_sources
+          select: count(SOURCEID)
+          from: inputs/config_audience_sources
+          is_feature: true
+          description: "Number of audiences connected to sources"
+  - name: admin_vars
+    entity_cohort: models/valid_workspace
+    time_grain: "week"
+    vars:
+      - entity_var:
+          name: num_access_tokens
+          select: count(ACCESSTOKEN)
+          from: inputs/config_access_tokens
+          is_feature: true
+          description: "Number of access tokens"
+      - entity_var:
+          name: num_locked_resources
+          select: count(ID)
+          from: inputs/config_permissions
+          where: LOCKED = TRUE
+          is_feature: true
+          description: "Number of locked resources"
+      - entity_var: 
+          name: last_accessed
+          select: max(timestamp)
+          from: inputs/webapp_pages
+          is_feature: true
+          description: "Last time workspace was accessed through the dashboard"
+      - entity_var:
+          name: num_audit_logs
+          select: count(ID)
+          from: inputs/config_audit_logs
+          is_feature: true
+          description: "Number of audit logs"
+      - entity_var:
+          name: num_audit_logs_last_30_days
+          select: count(ID)
+          from: inputs/config_audit_logs
+          where: createdat >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of audit logs in the last 30 days"
+      - input_var:
+          name: audit_log_workspace_rank
+          description: "Rank of the auditlog entry based on the number of audit logs"
+          select: RANK()
+          from: inputs/config_audit_logs
+          window:
+            partition_by:
+              - workspace_main_id
+            order_by:
+              - createdat desc
+      - entity_var:
+          name: audit_logs_activity_last_10_events
+          select: LISTAGG(CONCAT(CREATEDAT, '::', TARGETTYPE, '::', ACTION), ', ')
+          from: inputs/config_audit_logs
+          where: "{{ config_audit_logs.Var('audit_log_workspace_rank') }} <= 10"
+          is_feature: true
+          description: "Last 10 audit log events"
+      - entity_var:
+          name: most_recent_audit_log_activity
+          select: max(createdat)
+          from: inputs/config_audit_logs
+          is_feature: true
+          description: "Most recent audit activity time"
+  # TODO: Fix the workspace name list for test workspaces
+  - name: debug_vars
+    entity_key: workspace
+    vars:
+      - entity_var:
+          name: is_test_workspace
+          select: 1
+          from: inputs/config_workspaces
+          where: LOWER(NAME) LIKE '%rudderstack%' OR LOWER(NAME) LIKE '%rudderlabs%'
+          is_feature: true
+          description: "Is this an internal workspace used for testing"
+  - name: catch_all_vars
+    entity_cohort: models/valid_workspace
+    vars:
+      - entity_var:
+          name: num_consent_configured_destinations
+          select: count(ID)
+          from: inputs/config_destinations
+          where: CONFIG:"consentManagement" is not null and CONFIG:"consentManagement"::STRING  != '{}'
+          is_feature: true
+          description: "Number of destinations with consent configured"
+      - entity_var:
+          name: num_extract_sources
+          select: count(ID)
+          from: inputs/config_enriched_sources_view
+          where: CATEGORY IN ('cloud', 'singer-protocol')
+          description: "Number of extract sources"
+      - entity_var:
+          name: num_warehouse_destinations
+          select: count(ID)
+          from: inputs/config_enriched_destinations_view
+          where: CATEGORY = 'warehouse'
+          is_feature: true
+          description: "Number of warehouse destinations"
+  - name: usage_vars
+    entity_cohort: models/valid_workspace
+    time_grain: "day"
+    vars:
+      # events_ingested_30d moved to main workspace_var group
+      - entity_var:
+          name: events_delivered_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: TERMINALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          is_feature: true
+          description: "Number of events delivered by the workspace in the last 30 days"
+      # events_aborted_30d
+      - entity_var:
+          name: events_aborted_approx_30d
+          select: sum(ABORT_SUM)
+          from: inputs/reporting_data
+          where: BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP())) and ABORT_SUM > 0
+          is_feature: true
+          description: "Number of events aborted by the workspace in the last 30 days excluding tracking plan and transformation aborts"
+
+  - name: profiles_vars
+    entity_cohort: models/valid_workspace
+    vars:
+      - entity_var:
+          name: num_profiles_projects
+          select: count(ID)
+          from: inputs/config_profiles_projects
+          is_feature: true
+          description: "Number of profiles projects"

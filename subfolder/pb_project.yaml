@@ -1,30 +1,114 @@
-# Project name
-name: base_features
-# Project's yaml schema version
-schema_version: 80
-# WH Connection Profile to use.
+name: product
+schema_version: 72
 connection: test
-# Model folders to use.
 model_folders:
-  - models
-# Entities in this project and their ids.
+  - models/profiles
+  - models/inputs/common
+  # - models/inputs/dev
+  - models/inputs/prod
 entities:
   - name: user
-    id_stitcher: models/rudder_user_id_stitcher
+    id_stitcher: models/user_id_stitcher
     id_types:
-      - user_id
-      - anonymous_id
       - email
-      - cart_token
+      - user_id
+      - anon_id
     feature_views:
       using_ids:
+        - id: email
+          name: user_email_fv
         - id: user_id
-          name: user_id_user_default_entity_serve_360
-          # Added by auto migration, please update the name as per your requirement
+          name: user_id_fv
+  - name: workspace
+    id_stitcher: models/workspace_id_graph
+    id_types:
+      - workspace_id
+      - workspace_name
+      - destination_id
+      - source_id
+      # - transformation_id
+      # - audience_id
+    feature_views:
+      using_ids:
+        - id: workspace_name
+          name: workspace_name_fv
+  - name: organization
+    id_stitcher: models/organization_id_graph
+    id_types:
+      - org_id
+      - org_name
+      - salesforce_id
+      - slack_channel_name
+      - workspace_id
+    feature_views:
+      using_ids:
+        - id: org_name
+          name: org_name_fv
+        - id: org_id
+          name: org_id_fv
+  - name: source_type
+    default_id_stitcher:
+      materialization:
+        run_type: incremental
+        enable_status: good_to_have
+    id_types:
+      - source_defn_id
+      - source_defn_name
+      - source_id
+    feature_views:
+      using_ids:
+        - id: source_defn_name
+          name: source_defn_name_fv
+  - name: destination_type
+    default_id_stitcher:
+      materialization:
+        run_type: incremental
+        enable_status: good_to_have
+    id_types:
+      - destination_defn_id
+      - destination_defn_name
+      - destination_id
+    feature_views:
+      using_ids:
+        - id: destination_defn_name
+          name: destination_defn_name_fv
+  - name: source
+    default_id_stitcher:
+      materialization:
+        run_type: incremental
+        enable_status: good_to_have
+    id_types:
+      - source_id
+  - name: destination
+    default_id_stitcher:
+      materialization:
+        run_type: incremental
+        enable_status: good_to_have
+    id_types:
+      - destination_id
+      
 id_types:
+  - name: workspace_id
+  - name: workspace_name
+    filters:
+      - type: exclude
+        regex: "rudderstack.*"
+      - type: exclude
+        regex: "rudderlabs.*"
+  - name: source_id
+  - name: destination_id
+  # - name: transformation_id
+  # - name: audience_id
+  - name: source_defn_id
+  - name: source_defn_name
+  - name: destination_defn_id
+  - name: destination_defn_name
+  - name: org_id
+  - name: org_name
+  - name: salesforce_id
+  - name: slack_channel_name
   - name: user_id
-  - name: cart_token
-  - name: anonymous_id
+  - name: anon_id
     filters:
       - type: exclude
         value: ""
@@ -38,4 +122,7 @@ id_types:
         regex: ".+@.+"
       - type: exclude
         value: "test@company.com"
-retention_period: 720h0m0s
+      - type: exclude
+        regex: ".*@rudderstack.com"
+      - type: exclude
+        regex: ".*@rudderlabs.com"

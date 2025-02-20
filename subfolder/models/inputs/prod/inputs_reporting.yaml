@@ -1,0 +1,24 @@
+inputs:
+  - name: reporting_data
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      view: RUDDER_TEST_EVENTS.PPW_PUBLIC.METRICS_DAILY_UNION
+      occurred_at_col: TO_TIMESTAMP_NTZ(BUCKET / 1000)
+      ids:
+        - select: WORKSPACEID
+          type: workspace_id
+          entity: workspace
+        - select: SOURCEID
+          type: source_id
+          entity: source_type
+        - select: SOURCEID
+          type: source_id
+          entity: source
+        - select: DESTINATIONID
+          type: destination_id
+          entity: destination_type
+        - select: DESTINATIONID
+          type: destination_id
+          entity: destination

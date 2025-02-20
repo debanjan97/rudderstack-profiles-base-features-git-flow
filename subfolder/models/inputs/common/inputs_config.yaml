@@ -1,0 +1,278 @@
+inputs:
+  - name: config_workspaces
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.WORKSPACES
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: ID
+          type: workspace_id
+          to_default_stitcher: true
+        - entity: workspace
+          select: name
+          type: workspace_name
+          to_default_stitcher: true
+        - entity: organization
+          select: ORGANIZATIONID
+          type: org_id
+          to_default_stitcher: true
+  - name: config_organizations
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.ORGANIZATIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: organization
+          select: ID
+          type: org_id
+        - entity: organization
+          select: name
+          type: org_name
+  - name: config_source_definitions
+    contract:
+      with_entity_ids:
+        - source_type
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.SOURCE_DEFINITIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+        - entity: source_type
+          select: ID
+          type: source_defn_id
+          to_default_stitcher: true
+        - entity: source_type
+          select: DISPLAYNAME
+          type: source_defn_name
+          to_default_stitcher: true
+  - name: config_destination_definitions
+    contract:
+      with_entity_ids:
+        - destination_type
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.DESTINATION_DEFINITIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+        - entity: destination_type
+          select: ID
+          type: destination_defn_id
+          to_default_stitcher: true
+        - entity: destination_type
+          select: DISPLAYNAME
+          type: destination_defn_name
+          to_default_stitcher: true
+  - name: config_sources
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.SOURCES
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+        - entity: workspace
+          select: ID
+          type: source_id
+          to_default_stitcher: true
+        - entity: source_type
+          select: SOURCEDEFINITIONID
+          type: source_defn_id
+          to_default_stitcher: true
+        - entity: source_type
+          select: ID
+          type: source_id
+          to_default_stitcher: true
+        - entity: source
+          select: ID
+          type: source_id
+          to_default_stitcher: true
+  - name: config_destinations
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.DESTINATIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+        - entity: workspace
+          select: ID
+          type: destination_id
+          to_default_stitcher: true
+        - entity: destination_type
+          select: DESTINATIONDEFINITIONID
+          type: destination_defn_id
+          to_default_stitcher: true
+        - entity: destination_type
+          select: ID
+          type: destination_id
+          to_default_stitcher: true
+        - entity: destination
+          select: ID
+          type: destination_id
+          to_default_stitcher: true
+  # Inputs for Profiles
+  - name: config_profiles_projects
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.WHT_PROJECTS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  # Inputs for Data Catalogs/Tracking Plans
+  - name: config_tracking_plans
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.DG_TRACKING_PLANS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_source_tracking_plans
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.DG_SOURCE_TRACKINGPLAN_CONFIGS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+
+  # Inputs for admin features
+  - name: config_access_tokens
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.ACCESS_TOKENS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+  - name: config_permissions
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.PERMISSIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+  - name: config_audit_logs
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.AUDIT_LOGS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACE
+          type: workspace_id
+  # Inputs for transformations
+  - name: config_transformations
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.TRANSFORMATIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_transformation_libraries
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.TRANSFORMATION_LIBRARIES
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_dest_transformations
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.DESTINATION_TRANSFORMATIONS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: DESTINATIONID
+          type: destination_id
+          to_default_stitcher: true
+  
+  # Inputs for rETL features
+  - name: config_audiences
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.AUDIENCE
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true
+  - name: config_audience_sources
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.AUDIENCE_SOURCE
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: SOURCEID
+          type: source_id
+          to_default_stitcher: true
+  - name: config_retl_sql_models
+    contract:
+      with_entity_ids:
+        - workspace
+    app_defaults:
+      table: RUDDER_TEST_EVENTS.PPW_PUBLIC.SQL_MODELS
+      occurred_at_col: createdat
+      ids:
+        - entity: workspace
+          select: WORKSPACEID
+          type: workspace_id
+          to_default_stitcher: true

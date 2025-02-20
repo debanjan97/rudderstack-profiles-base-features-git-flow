@@ -1,0 +1,223 @@
+models:
+  - name: organization_id_graph
+    model_type: id_stitcher
+    model_spec:
+      entity_key: organization
+      validity_time: 24h
+      edge_sources:
+        - from: inputs/sf_account
+        - from: inputs/config_workspaces
+        - from: inputs/config_organizations
+  - name: paid_org
+    model_type: entity_cohort
+    model_spec:
+      extends: organization/all
+      materialization:
+        output_type: table
+      filter_pipeline:
+        - type: include
+          value: "{{ organization.Var('plan_type') }} is not null"
+      feature_views:
+        using_ids:
+          - id: org_name
+            name: paid_org_name_fv
+var_groups:
+  - name: organization_vars
+    entity_key: organization
+    vars:
+      - entity_var:
+          from: inputs/cs_user_accounts
+          name: app_org_name
+          select: any_value(ORGNAME)
+          is_feature: true
+          description: "Name of the organization"
+  - name: sf_account_vars
+    entity_key: organization
+    vars:
+      - entity_var:
+          from: inputs/sf_account
+          name: plan_type
+          select: any_value(PRODUCT_TIER_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+          is_feature: true
+          description: "Type of plan"
+      - entity_var:
+          from: inputs/sf_account
+          name: arr
+          select: any_value(WON_CUSTOMER_ACCOUNT_REVENUE_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+          is_feature: true
+          description: "ARR of the organization"
+      - entity_var:
+          from: inputs/sf_account
+          name: sf_account_id
+          select: any_value(id)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: account_status
+          select: any_value(ACCOUNT_STATUS_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: has_churned
+          select: any_value(ACCOUNT_STATUS_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: account_sub_status
+          select: any_value(ACCOUNT_SUB_STATUS_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: contracted_event_volume
+          select: any_value(CONTRACTED_EVENT_VOLUME_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+  - name: sf_account_key_dates
+    entity_key: organization
+    vars:
+      - entity_var:
+          from: inputs/sf_account
+          name: registration_date
+          select: any_value(REGISTRATION_DATE_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: closed_lost_date
+          select: any_value(CLOSED_LOST_DATE_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: signed_date
+          select: any_value(CUSTOMER_SIGNED_DATE_2_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: renewal_date
+          select: any_value(RENEWAL_DUE_DATE_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+      - entity_var:
+          from: inputs/sf_account
+          name: churned_date
+          select: any_value(CHURN_DATE_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+  - name: sf_account_types
+    entity_key: organization
+    vars:
+      - entity_var:
+          from: inputs/sf_account
+          name: is_b2b
+          select: any_value(B_2_B_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+          is_feature: true
+      - entity_var:
+          from: inputs/sf_account
+          name: is_b2c
+          select: any_value(B_2_C_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+          is_feature: true
+      - entity_var:
+          from: inputs/sf_account
+          name: is_ecommerce
+          select: any_value(E_COMMERCE_C)
+          where: record_type_id <> '0125x0000006uLeAAI'
+          is_feature: true
+    # TODO: for segment, mParticle, Snowplow
+  - name: sf_opportunity_vars
+    entity_key: organization
+    vars:
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: pipeline_arr
+          select: MAX(AMOUNT)
+          where: IS_WON = FALSE and STAGE_NAME <> 'Closed Lost' and IS_DELETED = FALSE
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: has_poc
+          select: any_value(POC_C)
+          where: IS_WON = FALSE and STAGE_NAME <> 'Closed Lost' and IS_DELETED = FALSE
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: pipeline_stage
+          select: any_value(STAGE_NAME)
+          where: IS_WON = FALSE and STAGE_NAME <> 'Closed Lost' and IS_DELETED = FALSE
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: expected_revenue
+          select: any_value(EXPECTED_REVENUE)
+          where: IS_WON = FALSE and STAGE_NAME <> 'Closed Lost' and IS_DELETED = FALSE
+      # LOSS_REASON_C, COMPETITION_C, COMPANY_TYPE_C
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: loss_reason
+          select: any_value(LOSS_REASON_C)
+          where: IS_WON = FALSE and STAGE_NAME = 'Closed Lost' and IS_DELETED = FALSE
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: competition
+          select: any_value(COMPETITION_C)
+          where: IS_WON = FALSE and STAGE_NAME = 'Closed Lost' and IS_DELETED = FALSE
+      - entity_var:
+          from: inputs/sf_opportunity
+          name: company_type
+          select: any_value(COMPANY_TYPE_C)
+          where: IS_WON = FALSE and STAGE_NAME = 'Closed Lost' and IS_DELETED = FALSE
+  - name: gong_vars
+    entity_key: organization
+    vars:
+      - entity_var:
+          from: inputs/gong_call
+          name: num_gong_calls_pre_sale
+          select: count(*)
+          where: DATE < {{organization.Var("signed_date")}}
+      - entity_var:
+          from: inputs/gong_call
+          name: num_gong_calls_post_sale
+          select: count(*)
+          where: DATE >= {{organization.Var("signed_date")}}
+      - entity_var:
+          from: inputs/gong_call
+          name: gong_call_duration_pre_sale
+          select: sum(DURATION)
+          where: DATE < {{organization.Var("signed_date")}}
+      - entity_var:
+          from: inputs/gong_call
+          name: gong_call_duration_post_sale
+          select: sum(DURATION)
+          where: DATE >= {{organization.Var("signed_date")}}
+      - entity_var:
+          from: inputs/gong_call
+          name: num_gong_calls_last_90
+          select: count(*)
+          where: DATE > dateadd(day, -90, current_date())
+      - entity_var:
+          from: inputs/gong_call
+          name: num_gong_calls_last_60
+          select: count(*)
+          where: DATE > dateadd(day, -60, current_date())
+      - entity_var:
+          from: inputs/gong_call
+          name: num_gong_calls_last_30
+          select: count(*)
+          where: DATE > dateadd(day, -30, current_date())
+      - entity_var:
+          from: inputs/gong_call
+          name: gong_call_duration_last_90
+          select: sum(DURATION)
+          where: DATE > dateadd(day, -90, current_date())
+      - entity_var:
+          from: inputs/gong_call
+          name: gong_call_duration_last_60
+          select: sum(DURATION)
+          where: DATE > dateadd(day, -60, current_date())
+      - entity_var:
+          from: inputs/gong_call
+          name: gong_call_duration_last_30
+          select: sum(DURATION)
+          where: DATE > dateadd(day, -30, current_date())
+
+      # - entity_var: (num_users, first_contact, closed_deal_on, deal_cycle, churn_date)
+          # - entity_var:
+          #     from: models/workspace_vars
+          #     name: num_sources
+          #     select: sum(num_sources)

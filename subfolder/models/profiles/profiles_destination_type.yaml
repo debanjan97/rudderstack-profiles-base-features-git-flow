@@ -1,0 +1,63 @@
+var_groups:
+  - name: destination_vars
+    entity_key: destination_type
+    time_grain: day
+    vars:
+      - entity_var:
+          name: category
+          select: any_value(CATEGORY)
+          from: inputs/config_destination_definitions
+          is_feature: true
+          description: "Category of the destination"
+      - entity_var:
+          name: num_destinations
+          select: count(ID)
+          from: inputs/config_destinations
+          is_feature: true
+          description: "Number of destinations for a destination type"
+      - entity_var:
+          name: new_destinations_last_7_days
+          select: count(ID)
+          from: inputs/config_destinations
+          where: createdat >= dateadd('day', -7, current_date())
+          is_feature: true
+          description: "Number of destinations created in the last 7 days for a destination type"
+      - entity_var:
+          name: new_destinations_last_30_days
+          select: count(ID)
+          from: inputs/config_destinations
+          where: createdat >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of destinations created in the last 30 days for a destination type"
+      - entity_var:
+          name: destination_type_events_delivered_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: TERMINALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          is_feature: true
+          description: "Number of events delivered for specific destination type in the last 30 days"
+      # Num active destinations - destinations that have delivered events > 100 in the last 30 days.
+      - input_var:
+          name: destination_delivered_events_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: TERMINALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          window:
+            partition_by:
+              - destination_type_main_id
+              - DESTINATIONID
+      - entity_var:
+          name: num_active_destinations
+          select: count(distinct DESTINATIONID)
+          from: inputs/reporting_data
+          where: TERMINALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP())) and SUCCESS_SUM > 100 and {{ reporting_data.Var("destination_delivered_events_30d") > 100 }}
+          is_feature: true
+          description: "Number of active destinations for a destination type"
+      # Consent configured destinations
+      - entity_var:
+          name: num_consent_configured_destinations
+          select: count(ID)
+          from: inputs/config_destinations
+          where: CONFIG:"consentManagement" is not null and CONFIG:"consentManagement"::STRING  != '{}'
+          is_feature: true
+          description: "Number of destinations with consent configured"

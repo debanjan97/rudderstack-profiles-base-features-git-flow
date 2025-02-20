@@ -1,0 +1,101 @@
+models:
+  - name: user_id_stitcher
+    model_type: id_stitcher
+    model_spec:
+      validity_time: 24h
+      entity_key: user
+      materialization:
+        output_type: view
+        run_type: discrete
+      edge_sources:
+        - from: inputs/webapp_identifies
+        - from: inputs/webapp_tracks
+        - from: inputs/docs_pages
+  # - name: email_users_cohort
+  #   model_type: entity_cohort
+  #   model_spec:
+  #     extends: user/all
+  #     filter_pipeline:
+  #       - type: include
+  #         value: "{{ user.Var('id_type_email_count') > 0 }} '"
+var_groups:
+  - name: user_vars
+    entity_key: user
+    time_grain: "day"
+    vars:
+      - entity_var:
+          name: num_tracks
+          select: count(*)
+          from: inputs/webapp_tracks
+          is_feature: true
+          description: "Number of tracks events"
+      - input_var:
+          name: app_events_count
+          select: count(1)
+          window:
+            partition_by:
+              - event
+              - user_main_id
+          from: inputs/webapp_tracks
+          where: event IS NOT NULL AND event != 'exposure' and event != 'mutiny_experience_viewed' and event != 'mutiny_signup'
+      - entity_var:
+          name: app_events_frequency
+          select: array_agg(distinct object_construct('e', event, 'c', {{webapp_tracks.Var("app_events_count")}}))
+          from: inputs/webapp_tracks
+          where: event IS NOT NULL AND event != 'exposure' and event != 'mutiny_experience_viewed' and event != 'mutiny_signup'
+          is_feature: true
+          description: "Frequency of events user performed in the app"
+      # app_page_views_count, app_page_views_frequency
+      - input_var:
+          name: app_page_views_count
+          select: count(1)
+          window:
+            partition_by:
+              - path
+              - user_main_id
+          from: inputs/webapp_pages
+          where: PATH != '/' and PATH != '/login' and PATH != '/signup'
+      - entity_var:
+          name: app_page_views_frequency
+          select: array_agg(distinct object_construct('p', path, 'c', {{webapp_pages.Var("app_page_views_count")}}))
+          from: inputs/webapp_pages
+          where: PATH != '/' and PATH != '/login' and PATH != '/signup'
+          is_feature: true
+          description: "Frequency of pages user visited in the app"
+      - entity_var:
+          name: no_of_docs_visits
+          select: count(*)
+          where: path ilike '/docs%'
+          from: inputs/docs_pages
+          is_feature: true
+          description: "Number of times user visited docs"
+      - input_var:
+          name: page_view_count
+          select: count(1)
+          window:
+            partition_by:
+              - path
+              - user_main_id
+          from: inputs/docs_pages
+          where: path ilike '/docs%' AND path IS NOT NULL AND path != ''
+      - entity_var:
+          name: docs_visit_frequency
+          select: array_agg(distinct object_construct('path', path, 'view_count', {{docs_pages.Var("page_view_count")}}))
+          where: path ilike '/docs%' AND path IS NOT NULL AND path != ''
+          from: inputs/docs_pages
+          is_feature: true
+      - entity_var:
+          name: first_email
+          select: first_value(email ignore nulls)
+          from: inputs/webapp_identifies
+          window:
+            order_by:
+              - timestamp asc
+          is_feature: true
+          description: "First email user used to sign up"
+      - entity_var: 
+          name: last_logged_in
+          select: max(timestamp)
+          from: inputs/webapp_pages
+          is_feature: true
+          description: "Last time user logged in"

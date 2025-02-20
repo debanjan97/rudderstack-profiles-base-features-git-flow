@@ -1,0 +1,55 @@
+var_groups:
+  - name: source_vars
+    entity_key: source_type
+    time_grain: day
+    vars:
+      - entity_var:
+          name: category
+          select: any_value(CATEGORY)
+          from: inputs/config_source_definitions
+          is_feature: true
+          description: "Category of the source"
+      - entity_var:
+          name: num_sources
+          select: count(ID)
+          from: inputs/config_sources
+          is_feature: true
+          description: "Number of sources for a source type"
+      - entity_var:
+          name: new_sources_last_7_days
+          select: count(ID)
+          from: inputs/config_sources
+          where: createdat >= dateadd('day', -7, current_date())
+          is_feature: true
+          description: "Number of sources created in the last 7 days for a source type"
+      - entity_var:
+          name: new_sources_last_30_days
+          select: count(ID)
+          from: inputs/config_sources
+          where: createdat >= dateadd('day', -30, current_date())
+          is_feature: true
+          description: "Number of sources created in the last 30 days for a source type"
+      - entity_var:
+          name: source_type_events_ingested_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: INITIALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          is_feature: true
+          description: "Number of events ingested for specific source type in the last 30 days"
+      # Num active sources - sources that have ingested events > 100 in the last 30 days. 
+      - input_var:
+          name: source_ingested_events_30d
+          select: sum(SUCCESS_SUM)
+          from: inputs/reporting_data
+          where: INITIALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP()))
+          window:
+            partition_by:
+              - source_type_main_id
+              - SOURCEID 
+      - entity_var:
+          name: num_active_sources
+          select: count(distinct SOURCEID)
+          from: inputs/reporting_data
+          where: INITIALSTATE = TRUE and BUCKET >= DATE_PART(EPOCH_MILLISECOND, DATEADD('day', -30, CURRENT_TIMESTAMP())) and SUCCESS_SUM > 100 and {{ reporting_data.Var("source_ingested_events_30d") > 100 }}
+          is_feature: true
+          description: "Number of active sources for a source type"
