@@ -1,0 +1,15 @@
+2025-06-17T11:30:16+05:30	[34mINFO[0m	Current registry version: -1
+
+2025-06-17T11:30:16+05:30	[34mINFO[0m	Initializing common tables at latest version
+
+2025-06-17T11:30:40+05:30	[31mERROR[0m	ContextInterruptError
+Error:     Context interrupted. Terminating gracefully.
+
+
+2025-06-17T11:30:40+05:30	[34mINFO[0m	Task Summary:
+  Command:             /Users/debanjan/work/wht/pb compile --migrate_on_load
+  Start Time:          2025-06-17T11:30:16+05:30
+  End Time:            2025-06-17T11:30:40+05:30
+  Duration:            23.744067875s
+Program was interrupted. (Exit code: 130)
+
