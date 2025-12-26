@@ -190,6 +190,11 @@ var_groups:
           from: models/rsTracksUnionPages
           select: min(date({{rsTracksUnionPages.Var("session_start_time")}}))
           description: The first date on which an event has been recorded by the user
+      - entity_var:
+          name: first_seen_date_2
+          from: models/rsTracksUnionPages
+          select: min(date({{rsTracksUnionPages.Var("session_start_time")}}))
+          description: The first date on which an event has been recorded by the user
     # - entity_var:
     #     name: last_seen_date
     #     from: models/rsTracksUnionPages
