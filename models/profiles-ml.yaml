@@ -28,7 +28,7 @@ models:
 #           ignore_features:
 #             - user_email
 #             - first_name
-#             - last_name
+#             - last_names
 #     predict:
 #       inputs:
 #         - models/rudder_user_base_features

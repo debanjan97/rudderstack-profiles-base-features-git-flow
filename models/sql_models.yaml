@@ -32,3 +32,4 @@ models:
         with_columns:
           - name: user_id
           - name: anonymous_id
+
