@@ -129,4 +129,4 @@ models:
 #             features:
 #               - name: *percentile_name_90_days
 #                 description: 'Percentile of churn score. Higher the percentile, higher the probability of churn'
-#     <<: *feature_meta_data_90_daysssssssssssssswsss
+#     <<: *feature_meta_data_90_daysssssssssssssswssss
